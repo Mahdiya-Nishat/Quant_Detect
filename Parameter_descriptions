@@ -14,7 +14,7 @@ The available resource pool N_t is modeled as a mean-reverting stochastic proces
 | (P_0)                 | Reference received power                | Constant                                                                 |
 | (\gamma)              | Pathloss exponent                       | Environment-dependent constant                                           |
 | (S_{i,t})             | Shadow fading (slow)                    | (S_{i,t} \sim \mathcal{N}(0,\sigma_S^2))                                 |
-| (F_{i,t})             | Small-scale fading (fast)               | Rayleigh / Rician (in dB)                                                |
+| (F_{i,t})             | Small-scale fading (fast)               | Rayleigh (in dB)                                                |
 | (I_{i,t})             | Interference + impairment level         | (I_{i,t} = I_0 + c\rho_t + \xi_{i,t})                                    |
 | (I_0)                 | Baseline interference floor             | Constant                                                                 |
 | (c)                   | Load–interference coupling              | Constant                                                                 |
