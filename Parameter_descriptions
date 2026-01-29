@@ -1,0 +1,1 @@
+The available resource pool N_t is modeled as a mean-reverting stochastic process to capture slow temporal variations induced by scheduling inertia, beam reconfiguration, and coordination overhead, while preserving long-term capacity stability
