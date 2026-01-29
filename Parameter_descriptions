@@ -34,6 +34,6 @@ The available resource pool N_t is modeled as a mean-reverting stochastic proces
 | (d(Q_{i,t}))          | Per-device resource demand                   | (d(Q_{i,t})=\dfrac{d_0}{Q_{i,t}+\epsilon})                                                                                        |         |      |
 | (d_0)                 | Baseline resource demand unit                | Constant                                                                                                                          |         |      |
 | (\epsilon)            | Demand regularization constant               | (\epsilon>0)                                                                                                                      |         |      |
-| (K_t)                 | Number of active devices                     | K_t= K_t-1 + A_t -D_t where A_t= Poisson(\lambda) and D_t= Binomial (K_t-1, \rho_d) where \rho_d is the session duration of that device     |      |
+| (K_t)                 | Number of active devices                     | K_t= K_t-1 + A_t -D_t where A_t= Poisson(\lambda) and D_t= Binomial (K_t-1, p_d) where p_d is the session duration of that device |      |
 
 
