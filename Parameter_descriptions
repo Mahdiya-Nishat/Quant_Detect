@@ -1,1 +1,31 @@
 The available resource pool N_t is modeled as a mean-reverting stochastic process to capture slow temporal variations induced by scheduling inertia, beam reconfiguration, and coordination overhead, while preserving long-term capacity stability
+
+| Symbol                | Meaning                                 | Model / Formula                                                          |
+| --------------------- | --------------------------------------- | ------------------------------------------------------------------------ |
+| (t)                   | Discrete time index                     | (t = 1,2,\dots)                                                          |
+| (i)                   | Device index                            | (i = 1,\dots,K_t)                                                        |
+| (N_t)                 | Available resource pool at time (t)     | (N_t = \alpha N_{t-1} + (1-\alpha)\bar N + \epsilon_t)                   |
+| (\bar N)              | Long-term nominal resource capacity     | (\bar N = \mathbb{E}[N_t])                                               |
+| (\alpha)              | Resource inertia factor                 | (0<\alpha<1)                                                             |
+| (\epsilon_t)          | Resource fluctuation noise              | (\epsilon_t \sim \mathcal{N}(0,\sigma_N^2))                              |
+| (D_{i,t})             | Distance from device (i) to access node | (D_{i,t} = D_{i,t-1} + v_{i,t})                                          |
+| (v_{i,t})             | Distance increment (mobility-driven)    | (v_{i,t} \propto M_{i,t})                                                |
+| (P_{i,t})             | Measured received signal power          | (P_{i,t} = P_0 -10\gamma\log_{10}(D_{i,t}) + S_{i,t} + F_{i,t})          |
+| (P_0)                 | Reference received power                | Constant                                                                 |
+| (\gamma)              | Pathloss exponent                       | Environment-dependent constant                                           |
+| (S_{i,t})             | Shadow fading (slow)                    | (S_{i,t} \sim \mathcal{N}(0,\sigma_S^2))                                 |
+| (F_{i,t})             | Small-scale fading (fast)               | Rayleigh / Rician (in dB)                                                |
+| (I_{i,t})             | Interference + impairment level         | (I_{i,t} = I_0 + c\rho_t + \xi_{i,t})                                    |
+| (I_0)                 | Baseline interference floor             | Constant                                                                 |
+| (c)                   | Load–interference coupling              | Constant                                                                 |
+| (\rho_t)              | Load ratio                              | (\rho_t = \dfrac{U_t}{N_t})                                              |
+| (\xi_{i,t})           | Interference fluctuation                | Zero-mean noise                                                          |
+| (\mathrm{SINR}_{i,t}) | Signal-to-interference-plus-noise ratio | (\mathrm{SINR}*{i,t} = P*{i,t} - I_{i,t})                                |
+| (Q_{i,t})             | Device-reported quality indicator       | (Q_{i,t} = f(\mathrm{SINR}_{i,t}))                                       |
+| (f(\cdot))            | Monotone quantizer                      | (Q = \left\lfloor\dfrac{\mathrm{SINR}-\tau_{\min}}{\Delta}\right\rfloor) |
+| (K_t)                 | Number of active devices                | Time-varying                                                             |
+| (d(Q_{i,t}))          | Resource demand per device              | (d(Q_{i,t}) = \dfrac{d_0}{Q_{i,t}+\epsilon})                             |
+| (d_0)                 | Baseline resource unit                  | Constant                                                                 |
+| (\epsilon)            | Regularization constant                 | (\epsilon>0)                                                             |
+| (U_t)                 | Actual resource usage                   | (U_t = \min!\left(N_t,\sum_{i=1}^{K_t} d(Q_{i,t})\right))                |
+| (\eta_t)              | Resource utilization ratio              | (\eta_t = \dfrac{U_t}{N_t})                                              |
