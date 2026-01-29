@@ -1,31 +1,35 @@
 The available resource pool N_t is modeled as a mean-reverting stochastic process to capture slow temporal variations induced by scheduling inertia, beam reconfiguration, and coordination overhead, while preserving long-term capacity stability
-
-| Symbol                | Meaning                                 | Model / Formula                                                          |
-| --------------------- | --------------------------------------- | ------------------------------------------------------------------------ |
-| (t)                   | Discrete time index                     | (t = 1,2,\dots)                                                          |
-| (i)                   | Device index                            | (i = 1,\dots,K_t)                                                        |
-| (N_t)                 | Available resource pool at time (t)     | (N_t = \alpha N_{t-1} + (1-\alpha)\bar N + \epsilon_t)                   |
-| (\bar N)              | Long-term nominal resource capacity     | (\bar N = \mathbb{E}[N_t])                                               |
-| (\alpha)              | Resource inertia factor                 | (0<\alpha<1)                                                             |
-| (\epsilon_t)          | Resource fluctuation noise              | (\epsilon_t \sim \mathcal{N}(0,\sigma_N^2))                              |
-| (D_{i,t})             | Distance from device (i) to access node | (D_{i,t} = D_{i,t-1} + v_{i,t})                                          |
-| (v_{i,t})             | Distance increment (mobility-driven)    | (v_{i,t} \propto M_{i,t})                                                |
-| (P_{i,t})             | Measured received signal power          | (P_{i,t} = P_0 -10\gamma\log_{10}(D_{i,t}) + S_{i,t} + F_{i,t})          |
-| (P_0)                 | Reference received power                | Constant                                                                 |
-| (\gamma)              | Pathloss exponent                       | Environment-dependent constant                                           |
-| (S_{i,t})             | Shadow fading (slow)                    | (S_{i,t} \sim \mathcal{N}(0,\sigma_S^2))                                 |
-| (F_{i,t})             | Small-scale fading (fast)               | Rayleigh (in dB)                                                |
-| (I_{i,t})             | Interference + impairment level         | (I_{i,t} = I_0 + c\rho_t + \xi_{i,t})                                    |
-| (I_0)                 | Baseline interference floor             | Constant                                                                 |
-| (c)                   | Load–interference coupling              | Constant                                                                 |
-| (\rho_t)              | Load ratio                              | (\rho_t = \dfrac{U_t}{N_t})                                              |
-| (\xi_{i,t})           | Interference fluctuation                | Zero-mean noise                                                          |
-| (\mathrm{SINR}_{i,t}) | Signal-to-interference-plus-noise ratio | (\mathrm{SINR}*{i,t} = P*{i,t} - I_{i,t})                                |
-| (Q_{i,t})             | Device-reported quality indicator       | (Q_{i,t} = f(\mathrm{SINR}_{i,t}))                                       |
-| (f(\cdot))            | Monotone quantizer                      | (Q = \left\lfloor\dfrac{\mathrm{SINR}-\tau_{\min}}{\Delta}\right\rfloor) |
-| (K_t)                 | Number of active devices                | Time-varying                                                             |
-| (d(Q_{i,t}))          | Resource demand per device              | (d(Q_{i,t}) = \dfrac{d_0}{Q_{i,t}+\epsilon})                             |
-| (d_0)                 | Baseline resource unit                  | Constant                                                                 |
-| (\epsilon)            | Regularization constant                 | (\epsilon>0)                                                             |
-| (U_t)                 | Actual resource usage                   | (U_t = \min!\left(N_t,\sum_{i=1}^{K_t} d(Q_{i,t})\right))                |
-| (\eta_t)              | Resource utilization ratio              | (\eta_t = \dfrac{U_t}{N_t})                                              |
+| Symbol                | Meaning                                      | Formula / Model                                                        |         |      |
+| --------------------- | -------------------------------------------- | ---------------------------------------------------------------------- | ------- | ---- |
+| (t)                   | Discrete time index                          | (t = 1,2,\dots)                                                        |         |      |
+| (i)                   | Device index                                 | (i = 1,\dots,K_t)                                                      |         |      |
+| **Constants**         | Time- and device-invariant system parameters | (P_0,\gamma,I_0,c,d_0,\kappa,\bar N,\bar M,D_{\min},D_{\max})          |         |      |
+| (N_t)                 | Available resource pool                      | (N_t = \alpha N_{t-1} + (1-\alpha)\bar N + \epsilon_t)                 |         |      |
+| (\bar N)              | Nominal average resource capacity            | Design constant                                                        |         |      |
+| (\alpha)              | Resource memory factor                       | (0<\alpha<1)                                                           |         |      |
+| (\epsilon_t)          | Resource fluctuation noise                   | (\epsilon_t \sim \mathcal{N}(0,\sigma_N^2))                            |         |      |
+| (M_{i,t})             | Mobility state of device (i)                 | (M_{i,t} = \beta M_{i,t-1} + (1-\beta)\bar M + \eta_{i,t})             |         |      |
+| (\beta)               | Mobility memory factor                       | (0 \le \beta < 1)                                                      |         |      |
+| (\bar M)              | Mean mobility level                          | Constant                                                               |         |      |
+| (\eta_{i,t})          | Mobility perturbation noise                  | (\eta_{i,t} \sim \mathcal{N}(0,\sigma_M^2))                            |         |      |
+| (v_{i,t})             | Distance increment                           | (v_{i,t} = \kappa M_{i,t})                                             |         |      |
+| (D_{i,t})             | Distance to access node                      | (D_{i,t} = \min{\max(D_{i,t-1}+v_{i,t},D_{\min}),D_{\max}})            |         |      |
+| (P_{i,t})             | Received signal power (dB)                   | (P_{i,t} = P_0 -10\gamma\log_{10}(D_{i,t}) + S_{i,t} + F_{i,t})        |         |      |
+| (P_0)                 | Reference received power (dB)                | Constant                                                               |         |      |
+| (\gamma)              | Pathloss exponent                            | Constant                                                               |         |      |
+| (S_{i,t})             | Shadow fading (dB)                           | (S_{i,t} \sim \mathcal{N}(0,\sigma_S^2))                               |         |      |
+| (h_{i,t})             | Small-scale channel coefficient              | (h_{i,t} \sim \mathcal{CN}(0,1))                                       |         |      |
+| (F_{i,t})             | Small-scale fading (dB)                      | (F_{i,t}=10\log_{10}(                                                  | h_{i,t} | ^2)) |
+| (I_{i,t})             | Interference + impairment (dB)               | (I_{i,t} = I_0 + c\rho_t + \xi_{i,t})                                  |         |      |
+| (I_0)                 | Baseline interference floor (dB)             | Constant                                                               |         |      |
+| (c)                   | Load–interference coupling                   | Constant                                                               |         |      |
+| (\xi_{i,t})           | Interference fluctuation (dB)                | (\xi_{i,t} \sim \mathcal{N}(0,\sigma_I^2))                             |         |      |
+| (U_t)                 | Actual resource usage                        | (U_t=\min!\left(N_t,\sum_{i=1}^{K_t} d(Q_{i,t})\right))                |         |      |
+| (\rho_t)              | Cell load (resource utilization)             | (\rho_t = \dfrac{U_t}{N_t})                                            |         |      |
+| (\mathrm{SINR}_{i,t}) | SINR (dB)                                    | (\mathrm{SINR}*{i,t}=P*{i,t}-I_{i,t})                                  |         |      |
+| (Q_{i,t})             | Device-reported quality                      | (Q_{i,t}=f(\mathrm{SINR}_{i,t}))                                       |         |      |
+| (f(\cdot))            | Monotone quantizer                           | (Q=\left\lfloor\dfrac{\mathrm{SINR}-\tau_{\min}}{\Delta}\right\rfloor) |         |      |
+| (d(Q_{i,t}))          | Resource demand per device                   | (d(Q_{i,t})=\dfrac{d_0}{Q_{i,t}+\epsilon})                             |         |      |
+| (d_0)                 | Baseline demand unit                         | Constant                                                               |         |      |
+| (\epsilon)            | Demand regularizer                           | (\epsilon>0)                                                           |         |      |
+| (K_t)                 | Number of active devices                     | Time-varying                                                           |         |      |
