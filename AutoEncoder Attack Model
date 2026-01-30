@@ -1,0 +1,57 @@
+#The GenAI attack model training to generate network channel states data
+
+# The AutoEncoder Model
+
+import torch
+import torch.nn as nn
+
+class AutoEncoder(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        # Encoder
+        self.encoder = nn.Sequential(
+            nn.Linear(5, 3),
+            nn.ReLU(),
+            nn.Linear(3, 2)
+        )
+
+        # Decoder
+        self.decoder = nn.Sequential(
+            nn.Linear(2, 3),
+            nn.ReLU(),
+            nn.Linear(3, 5)
+        )
+
+    def forward(self, x):
+        z = self.encoder(x)
+        x_hat = self.decoder(z)
+        return x_hat
+
+
+
+######
+model = AutoEncoder()
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+criterion = nn.MSELoss()
+
+X_tensor = torch.tensor(Xn, dtype=torch.float32)
+
+for epoch in range(300):
+    optimizer.zero_grad()
+    X_hat = model(X_tensor)
+    loss = criterion(X_hat, X_tensor)
+    loss.backward()
+    optimizer.step()
+
+    if epoch % 50 == 0:
+        print(f"Epoch {epoch}, Loss = {loss.item():.4e}")
+
+
+############
+with torch.no_grad():
+    # Extract only the reconstructed output (x_hat) from the VAE model's return tuple
+    X_hat = model(X_tensor)
+
+lambda_attack = 0.4  # stealth factor
+X_attack_AE = X_tensor + lambda_attack * (X_hat - X_tensor)
