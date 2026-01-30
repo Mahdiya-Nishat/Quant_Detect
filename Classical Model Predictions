@@ -1,0 +1,113 @@
+# The Classical Defence Predictions
+
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from sklearn.svm import OneClassSVM
+from sklearn.metrics import roc_curve
+from sklearn.preprocessing import StandardScaler
+
+## Splitting the dataset
+
+T = Xn.shape[0]
+
+idx_train = int(0.6 * T)
+idx_cal   = int(0.8 * T)
+
+X_train = Xn[:idx_train]
+X_cal   = Xn[idx_train:idx_cal]
+X_test  = Xn[idx_cal:]
+
+X_AE_test  = X_attack_AE[idx_cal:]
+X_VAE_test = X_attack_VAE[idx_cal:]
+X_GAN_test = X_attack_GAN[idx_cal:]
+
+def to_percent(x):
+    return 100 * x
+
+
+#The One Class AutoEncoder Defence
+
+class OCAE(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.enc = nn.Sequential(
+            nn.Linear(5, 3),
+            nn.ReLU(),
+            nn.Linear(3, 2)
+        )
+        self.dec = nn.Sequential(
+            nn.Linear(2, 3),
+            nn.ReLU(),
+            nn.Linear(3, 5)
+        )
+
+    def forward(self, x):
+        z = self.enc(x)
+        return self.dec(z)
+
+
+ae = OCAE()
+opt = torch.optim.Adam(ae.parameters(), lr=1e-3)
+loss_fn = nn.MSELoss()
+
+X_train_t = torch.tensor(X_train, dtype=torch.float32)
+
+for epoch in range(300):
+    opt.zero_grad()
+    X_hat = ae(X_train_t)
+    loss = loss_fn(X_hat, X_train_t)
+    loss.backward()
+    opt.step()
+
+def ae_score(model, X):
+    X_t = torch.tensor(X, dtype=torch.float32)
+    with torch.no_grad():
+        X_hat = model(X_t)
+    return np.linalg.norm(X - X_hat.numpy(), axis=1)
+
+
+FPR = 0.7
+
+scores_cal = ae_score(ae, X_cal)
+tau_ae = np.percentile(scores_cal, 100 * (1 - FPR))
+
+
+def tpr(scores, tau):
+    return np.mean(scores > tau)
+
+TPR_AE_AE  = tpr(ae_score(ae, X_AE_test),  tau_ae)
+TPR_AE_VAE = tpr(ae_score(ae, X_VAE_test), tau_ae)
+TPR_AE_GAN = tpr(ae_score(ae, X_GAN_test), tau_ae)
+
+
+# The one class SVM defence
+
+ocsvm = OneClassSVM(kernel='rbf', gamma='scale', nu=FPR)
+ocsvm.fit(X_train)
+
+def svm_score(model, X):
+    return -model.decision_function(X)
+
+scores_cal = svm_score(ocsvm, X_cal)
+tau_svm = np.percentile(scores_cal, 100 * (1 - FPR))
+
+TPR_SVM_AE  = tpr(svm_score(ocsvm, X_AE_test),  tau_svm)
+TPR_SVM_VAE = tpr(svm_score(ocsvm, X_VAE_test), tau_svm)
+TPR_SVM_GAN = tpr(svm_score(ocsvm, X_GAN_test), tau_svm)
+
+## Calculate their predictions
+
+print("TPR (%) @ FPR = 0.5%")
+
+print("\nOne-Class Autoencoder:")
+print(f"  AE attack  : {to_percent(TPR_AE_AE):.2f}%")
+print(f"  VAE attack : {to_percent(TPR_AE_VAE):.2f}%")
+print(f"  GAN attack : {to_percent(TPR_AE_GAN):.2f}%")
+
+print("\nOne-Class SVM:")
+print(f"  AE attack  : {to_percent(TPR_SVM_AE):.2f}%")
+print(f"  VAE attack : {to_percent(TPR_SVM_VAE):.2f}%")
+print(f"  GAN attack : {to_percent(TPR_SVM_GAN):.2f}%")
+
