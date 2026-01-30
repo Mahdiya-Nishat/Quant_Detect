@@ -1,0 +1,39 @@
+# Next we define the observable state vector X_t at any time t
+
+import numpy as np
+
+# Calculate mean and variance of SINR for active devices at each time step
+mean_sinr = np.zeros(T)
+var_sinr = np.zeros(T)
+
+for t_val in range(T):
+    if K[t_val] > 0: # K[t_val] is always >= 1 as per simulation setup
+        # Get SINR for all active devices at current time step
+        sinr_t_active = P[:K[t_val], t_val] - I[:K[t_val], t_val]
+        mean_sinr[t_val] = np.mean(sinr_t_active)
+        var_sinr[t_val] = np.var(sinr_t_active)
+
+X = np.column_stack([
+    rho[1:],                          # rho_t
+    rho[1:] - rho[:-1],               # drho_t
+    mean_sinr[1:],                    # average SINR
+    var_sinr[1:],                     # SINR variance
+    K[1:]                             # active devices
+])
+
+print (X)
+
+
+# Then let us visulize for the T=300 slots
+
+fig, axs = plt.subplots(5, 1, figsize=(8, 7), sharex=True)
+
+for i in range(5):
+    axs[i].plot(t, X[:T, i])
+    axs[i].set_ylabel(labels[i])
+    axs[i].grid(True)
+
+axs[-1].set_xlabel('Time slot $t$')
+fig.suptitle('Evolution of Network State $X_t$')
+plt.tight_layout()
+plt.show()
