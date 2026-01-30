@@ -1,0 +1,80 @@
+#The VAE model
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+Xn.shape == (T, 5)   # normalized benign data
+
+class VAE(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        # Encoder
+        self.fc1 = nn.Linear(5, 3)
+        self.fc_mu = nn.Linear(3, 2)
+        self.fc_logvar = nn.Linear(3, 2)
+
+        # Decoder
+        self.fc2 = nn.Linear(2, 3)
+        self.fc3 = nn.Linear(3, 5)
+
+    def encode(self, x):
+        h = F.relu(self.fc1(x))
+        mu = self.fc_mu(h)
+        logvar = self.fc_logvar(h)
+        return mu, logvar
+
+    def reparameterize(self, mu, logvar):
+        std = torch.exp(0.5 * logvar)
+        eps = torch.randn_like(std)
+        return mu + eps * std
+
+    def decode(self, z):
+        h = F.relu(self.fc2(z))
+        return self.fc3(h)
+
+    def forward(self, x):
+        mu, logvar = self.encode(x)
+        z = self.reparameterize(mu, logvar)
+        x_hat = self.decode(z)
+        return x_hat, mu, logvar
+
+
+
+def vae_loss(x, x_hat, mu, logvar, beta=1.0):
+    recon_loss = F.mse_loss(x_hat, x, reduction='mean')
+
+    kl_loss = -0.5 * torch.mean(
+        1 + logvar - mu.pow(2) - logvar.exp()
+    )
+
+    return recon_loss + beta * kl_loss
+
+
+
+#####
+X_tensor = torch.tensor(Xn, dtype=torch.float32)
+
+model = VAE()
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+
+for epoch in range(400):
+    optimizer.zero_grad()
+
+    X_hat, mu, logvar = model(X_tensor)
+    loss = vae_loss(X_tensor, X_hat, mu, logvar, beta=1.0)
+
+    loss.backward()
+    optimizer.step()
+
+    if epoch % 50 == 0:
+        print(f"Epoch {epoch}, Loss = {loss.item():.4e}")
+
+
+#####
+with torch.no_grad():
+    X_hat_vae, _, _ = model(X_tensor)
+
+lambda_attack = 0.5
+X_attack_VAE = X_tensor + lambda_attack * (X_hat_vae - X_tensor)
