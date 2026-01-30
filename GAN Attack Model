@@ -1,0 +1,102 @@
+# GAN Attack Model
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+Xn.shape == (T, 5)   # normalized benign data
+
+
+
+class Generator(nn.Module):
+    def __init__(self, z_dim=5):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(z_dim, 16),
+            nn.ReLU(),
+            nn.Linear(16, 16),
+            nn.ReLU(),
+            nn.Linear(16, 5)
+        )
+
+    def forward(self, z):
+        return self.net(z)
+
+
+
+class Discriminator(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(5, 16),
+            nn.ReLU(),
+            nn.Linear(16, 8),
+            nn.ReLU(),
+            nn.Linear(8, 1),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+
+G = Generator()
+D = Discriminator()
+
+lr = 1e-4
+opt_G = optim.Adam(G.parameters(), lr=lr)
+opt_D = optim.Adam(D.parameters(), lr=lr)
+
+criterion = nn.BCELoss()
+
+X_tensor = torch.tensor(Xn, dtype=torch.float32)
+batch_size = 64
+
+
+#####
+
+epochs = 800
+z_dim = 5
+
+for epoch in range(epochs):
+
+    # ---- Train Discriminator ----
+    idx = torch.randint(0, X_tensor.size(0), (batch_size,))
+    real = X_tensor[idx]
+
+    z = torch.randn(batch_size, z_dim)
+    fake = G(z)
+
+    D_real = D(real)
+    D_fake = D(fake.detach())
+
+    loss_D = (
+        criterion(D_real, torch.ones_like(D_real)) +
+        criterion(D_fake, torch.zeros_like(D_fake))
+    )
+
+    opt_D.zero_grad()
+    loss_D.backward()
+    opt_D.step()
+
+    # ---- Train Generator ----
+    z = torch.randn(batch_size, z_dim)
+    fake = G(z)
+    D_fake = D(fake)
+
+    loss_G = criterion(D_fake, torch.ones_like(D_fake))
+
+    opt_G.zero_grad()
+    loss_G.backward()
+    opt_G.step()
+
+    if epoch % 100 == 0:
+        print(f"Epoch {epoch} | D loss: {loss_D.item():.4f} | G loss: {loss_G.item():.4f}")
+
+
+##########
+with torch.no_grad():
+    z = torch.randn(X_tensor.size(0), z_dim)
+    X_hat_GAN = G(z)
+
+lambda_attack = 0.7
+X_attack_GAN = X_tensor + lambda_attack * (X_hat_GAN - X_tensor)
