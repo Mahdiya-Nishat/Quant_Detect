@@ -1,0 +1,288 @@
+import numpy as np
+
+
+theta_low = 0.045
+theta_high = 0.097
+
+
+
+np.random.seed(7)
+alpha_Q = 0.16
+
+
+
+# -----------------------------
+# Simulation horizon
+# -----------------------------
+T = 350
+MAX_DEV = 50
+
+# -----------------------------
+# Traffic model
+# -----------------------------
+lambda_arr = 0.3     # Poisson arrival rate
+p_d = 0.05           # per-device departure probability
+
+# -----------------------------
+# Resource model
+# -----------------------------
+N_bar = 100
+alpha = 0.9
+sigma_N = 4
+
+# -----------------------------
+# Mobility model
+# -----------------------------
+beta = 0.85
+M_bar = 0.8
+sigma_M = 0.15
+kappa = 0.5
+
+D_min, D_max = 10, 200
+
+# -----------------------------
+# Channel model
+# -----------------------------
+P0 = -30
+gamma = 2.2
+sigma_S = 3
+
+I0 = -100
+c = 6
+sigma_I = 2
+
+# -----------------------------
+# Quality / demand model
+# -----------------------------
+Q_max = 15
+tau_min = -5
+Delta = 2
+d0 = 5
+epsilon = 0.2
+
+# State Storage:
+
+K = np.zeros(T, dtype=int)
+N = np.zeros(T)
+U = np.zeros(T)
+rho = np.zeros(T)
+
+M = np.zeros((MAX_DEV, T))
+D = np.zeros((MAX_DEV, T))
+P = np.zeros((MAX_DEV, T))
+I = np.zeros((MAX_DEV, T))
+Q = np.zeros((MAX_DEV, T))
+
+
+# Initialization
+
+K[0] = 5
+N[0] = N_bar
+
+for i in range(K[0]):
+    M[i, 0] = np.random.uniform(0.3, 1.2)
+    D[i, 0] = np.random.uniform(30, 80)
+
+
+# Main Loop
+
+for t in range(1, T):
+
+    # ---- Device population (K_t) ----
+    A_t = np.random.poisson(lambda_arr)
+    D_t = np.random.binomial(K[t-1], p_d)
+    K[t] = max(1, min(MAX_DEV, K[t-1] + A_t - D_t))
+
+    # ---- Resource pool (N_t) ----
+    N[t] = alpha * N[t-1] + (1 - alpha) * N_bar \
+           + np.random.normal(0, sigma_N)
+    N[t] = max(20, N[t])
+
+    # ---- Per-device evolution ----
+    for i in range(K[t]):
+
+        # Mobility
+        M[i, t] = beta * M[i, t-1] + (1 - beta) * M_bar \
+                  + np.random.normal(0, sigma_M)
+
+        # Distance
+        D[i, t] = np.clip(
+            D[i, t-1] + kappa * M[i, t],
+            D_min, D_max
+        )
+
+        # Channel power
+        shadow = np.random.normal(0, sigma_S)
+        fading = 10 * np.log10(np.abs(np.random.randn())**2 + 1e-6)
+        P[i, t] = P0 - 10 * gamma * np.log10(D[i, t]) + shadow + fading
+
+    # ---- Load-dependent interference ----
+    rho_prev = rho[t-1] if t > 1 else 0
+    for i in range(K[t]):
+        I[i, t] = I0 + c * rho_prev + np.random.normal(0, sigma_I)
+
+    # ---- SINR, quality, demand ----
+    demand = 0
+    for i in range(K[t]):
+        sinr = P[i, t] - I[i, t]
+        q = np.floor((sinr - tau_min) / Delta)
+        Q[i, t] = np.clip(q, 0, Q_max)
+        demand += d0 * np.exp(-alpha_Q * Q[i, t])
+
+
+    # ---- Resource usage and load ----
+    U[t] = min(N[t], demand)
+    rho[t] = U[t] / N[t]
+    rho_tilde = np.zeros_like(rho)
+    rho_tilde[0] = rho[0]
+
+    alpha_s = 0.16
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
+
+
+
+t = np.arange(len(rho))
+
+# build line segments
+points = np.array([t, rho]).T.reshape(-1, 1, 2)
+segments = np.concatenate([points[:-1], points[1:]], axis=1)
+#rho_smooth = np.convolve(rho, np.ones(3)/3, mode='same')
+
+# color per SEGMENT (based on rho_t)
+colors = []
+for r in rho[:-1]:
+    if r < theta_low:
+        colors.append('green')
+    elif r < theta_high:
+        colors.append('gold')
+    else:
+        colors.append('red')
+
+# plot
+fig, ax = plt.subplots(figsize=(11,4))
+
+lc = LineCollection(segments, colors=colors, linewidth=1.6)
+ax.add_collection(lc)
+
+# thresholds
+ax.axhline(theta_low, linestyle='--', color='green', linewidth=1)
+ax.axhline(theta_high, linestyle='--', color='red', linewidth=1)
+
+ax.set_xlim(t.min(), t.max())
+ax.set_ylim(0, np.max(rho)*1.1)
+
+ax.set_xlabel("Time slot")
+ax.set_ylabel("Cell load $\\rho_t$")
+ax.grid(True)
+
+plt.tight_layout()
+plt.show()
+
+
+# Define the Regimes
+
+theta_low = np.quantile(rho, 0.30)
+theta_high = np.quantile(rho, 0.90)
+
+print(theta_low, theta_high)
+
+
+regime = np.zeros_like(rho, dtype=int)
+
+regime[rho < theta_low] = 0
+regime[(rho >= theta_low) & (rho < theta_high)] = 1
+regime[rho >= theta_high] = 2
+
+
+low_frac = np.mean(regime == 0)
+med_frac = np.mean(regime == 1)
+high_frac = np.mean(regime == 2)
+
+print(f"Low-load fraction   : {low_frac:.3f}")
+print(f"Medium-load fraction: {med_frac:.3f}")
+print(f"High-load fraction  : {high_frac:.3f}")
+
+
+Tmat = np.zeros((3, 3))
+
+for t in range(len(regime) - 1):
+    Tmat[regime[t], regime[t+1]] += 1
+
+# Normalize rows
+Tmat = Tmat / Tmat.sum(axis=1, keepdims=True)
+
+print("Regime Transition Matrix:")
+print(Tmat)
+
+
+
+import matplotlib.pyplot as plt
+
+labels = ['Low', 'Medium', 'High']
+fractions = [low_frac, med_frac, high_frac]
+
+plt.figure(figsize=(4,3))
+plt.bar(labels, fractions, color=['green', 'gold', 'red'])
+plt.ylabel("Fraction of time")
+plt.title("Regime Occupancy")
+plt.grid(axis='y')
+plt.tight_layout()
+plt.show()
+
+
+# Define the system state at t
+
+import numpy as np
+
+# Calculate mean and variance of SINR for active devices at each time step
+mean_sinr = np.zeros(T)
+var_sinr = np.zeros(T)
+
+for t_val in range(T):
+    if K[t_val] > 0: # K[t_val] is always >= 1 as per simulation setup
+        # Get SINR for all active devices at current time step
+        sinr_t_active = P[:K[t_val], t_val] - I[:K[t_val], t_val]
+        mean_sinr[t_val] = np.mean(sinr_t_active)
+        var_sinr[t_val] = np.var(sinr_t_active)
+
+X = np.column_stack([
+    rho[1:],                          # rho_t
+    rho[1:] - rho[:-1],               # drho_t
+    mean_sinr[1:],                    # average SINR
+    var_sinr[1:],                     # SINR variance
+    K[1:]                             # active devices
+])
+
+print (X)
+
+
+# Plotting the evolution of system state over T=300
+
+fig, axs = plt.subplots(5, 1, figsize=(8, 7), sharex=True)
+
+# Define labels locally for this plot
+labels = [
+    r'\rho_t',
+    r'\dot{\rho}_t',
+    r'Mean SINR',
+    r'SINR Variance',
+    r'K_t'
+]
+
+# Adjust 't' to match the length of X, which starts from time step 1
+t_plot = np.arange(1, T) # X has T-1 data points, corresponding to t=1 to T-1
+
+for i in range(5):
+    axs[i].plot(t_plot, X[:, i]) # Use t_plot and all rows of X
+    axs[i].set_ylabel(labels[i])
+    axs[i].grid(True)
+
+axs[-1].set_xlabel('Time slot $t$')
+fig.suptitle('Evolution of Network State $X_t$')
+plt.tight_layout()
+plt.show()
+
