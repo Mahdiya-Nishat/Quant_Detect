@@ -1,0 +1,65 @@
+# Plot 1 
+
+
+import matplotlib.pyplot as plt
+
+T = 300
+labels = [
+    r'$\rho_t$',
+    r'$\dot{\rho}_t$',
+    r'Mean SINR',
+    r'SINR Variance',
+    r'$K_t$'
+]
+
+fig, axs = plt.subplots(5, 1, figsize=(9, 9), sharex=True)
+
+for i in range(5):
+    axs[i].plot(Xn[:T, i], label='Benign', linewidth=2)
+    axs[i].plot(X_attack_AE[:T, i].numpy(),
+                linestyle='--', label='AE Attack')
+    axs[i].plot(X_attack_VAE[:T, i].numpy(),
+                linestyle=':', label='VAE Attack')
+    axs[i].plot(X_attack_GAN[:T, i].numpy(),
+                linestyle='-.', label='GAN Attack')
+
+    axs[i].set_ylabel(labels[i])
+    axs[i].grid(True)
+
+axs[-1].set_xlabel('Time slot $t$')
+axs[0].legend(loc='upper right', ncol=2)
+plt.tight_layout()
+plt.show()
+
+
+
+
+# Plot 2
+
+
+from sklearn.decomposition import PCA
+
+pca = PCA(n_components=2)
+
+Z_benign = pca.fit_transform(Xn)
+Z_AE = pca.transform(X_attack_AE.numpy())
+Z_VAE = pca.transform(X_attack_VAE.numpy())
+Z_GAN = pca.transform(X_attack_GAN.numpy())
+
+plt.figure(figsize=(6, 5))
+plt.scatter(Z_benign[:, 0], Z_benign[:, 1],
+            alpha=0.35, label='Benign')
+plt.scatter(Z_AE[:, 0], Z_AE[:, 1],
+            alpha=0.35, label='AE Attack')
+plt.scatter(Z_VAE[:, 0], Z_VAE[:, 1],
+            alpha=0.35, label='VAE Attack')
+plt.scatter(Z_GAN[:, 0], Z_GAN[:, 1],
+            alpha=0.35, label='GAN Attack')
+
+plt.xlabel('PC 1')
+plt.ylabel('PC 2')
+plt.title('Latent Geometry: Benign vs GenAI Attacks')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
