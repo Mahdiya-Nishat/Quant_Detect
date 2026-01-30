@@ -1,5 +1,4 @@
-# The Classical Defence Predictions
-
+# The Classical Model Detections
 import numpy as np
 import torch
 import torch.nn as nn
