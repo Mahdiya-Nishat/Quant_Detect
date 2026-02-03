@@ -15,8 +15,9 @@ They almost overlap, which is important. It means the attacker is not injecting 
 ![implicit decision boundaries](AE_2.png)
 
 ## Variational AutoEnoder (VAE)
+Unlike the autoencoder, the VAE does not learn a single deterministic projection of a network state. Instead, it learns a probabilistic latent distribution of benign states and generates attacked samples by sampling from that distribution. This means the VAE attack does not merely “smooth” an observed state toward normality; it actively re-randomizes the state within the support of benign data. As a result, VAE-generated states preserve global statistics and density very well, but they are less tightly anchored to the original physical realization.
 
-| Image 1 | Image 2 | Image 3 | Image 4 |
+| Latent Geometry Plot| load–SINR decision-space plot |per-state plots | Marginal distribution plot|
 | :---: | :---: | :---: | :---: |
 | ![Alt1](vae_1.png) | ![Alt2](vae_2.png) | ![Alt3](vae_3.png) | ![Alt4](vae_4.png) |
 
