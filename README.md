@@ -40,3 +40,7 @@ Finally, the marginal distribution plot shows that the VAE preserves the load di
 
 >[!NOTE]
 >The VAE attack shows that even when an attacker uses a strong generative model that can closely match the distribution of normal network states, there is still a fundamental limitation: matching statistics is not the same as respecting physical or control-layer relationships. The VAE hides extremely well in latent space and marginal distributions, which makes it harder to detect than the AE, but because it introduces randomness rather than controlled bias, it is less reliable at pushing the system across specific resource-allocation decision boundaries. This demonstrates a clear and realistic stealth–control tradeoff, strengthening the credibility of your threat model and justifying why detection must rely on joint consistency rather than simple statistical tests.
+
+```text
+Thus, we infer that VAE attack is very good at making fake network reports look normal, so simple checks cannot catch it. However, because it adds randomness, it does not always succeed in tricking the scheduler into giving extra resources. The AE attack, on the other hand, is more deliberate and consistently pushes the network toward favorable decisions, but it is slightly easier to spot. This shows that attackers face a choice between hiding well and manipulating decisions effectively, and your work studies both cases.
+```
