@@ -72,6 +72,7 @@ Finally, thefigure 4 analyzes the marginal distribution of the reported cell loa
 >*This highlights the capability of GAN-based attackers to remain stealthy across geometry, time, and statistics, reinforcing the need for detection mechanisms that go beyond marginal plausibility and consider deeper structural consistency.*
 
 ## The Intelligent Attacks by the Deep generative Models
+We consider a class of perception-layer attackers that leverage deep generative models to manipulate reported network state measurements without altering the underlying physical system. The attackers synthesize statistically plausible state reports that preserve latent geometry, marginal distributions, and temporal smoothness, while influencing how operating conditions are perceived by the controller. To capture the diversity of such threats, we instantiate three representative generative attackers: AE, VAE, and GAN, each reflecting a different tradeoff between statistical camouflage and decision-level control.
 
 | **Aspect**                         | **AE Attack**                                               | **VAE Attack**                                                   | **GAN Attack**                                                                       |
 | ---------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
@@ -83,7 +84,11 @@ Finally, thefigure 4 analyzes the marginal distribution of the reported cell loa
 | **Decision-bias control**          | High (direct and smooth)                                    | Medium (randomized)                                              | Variable (distribution-driven)                                                       |
 | **Temporal coherence**             | Preserved (follows true state series)                       | Weaker (due to sampling variance)                                | Preserved (learned from data)                                                        |
 
-
+>*This comparison table is intended to set the threat model baseline by categorizing generative perception-layer attackers according to how they synthesize manipulated network states.
+>The AE attack performs targeted, deterministic corrections toward the normal data manifold, making it effective at controlled decision bias.
+> The VAE attack samples from a probabilistic latent distribution, yielding high statistical camouflage but less directed influence.
+> The GAN attack adversarially aligns generated samples with the benign distribution, offering the highest level of stealth across geometry and marginal statistics, while its decision influence depends on the sampling dynamics learned during training.
+> Presenting these mechanisms side-by-side helps readers and reviewers understand not only what each attacker does, but also why the detector must reason about joint structural consistency rather than simple statistical or reconstruction error differences.*
 
 | **Metric**                    | **AE**      | **VAE**      | **GAN**      |
 | ----------------------------- | ----------- | ------------ | ------------ |
