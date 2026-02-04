@@ -54,3 +54,4 @@ Finally, the marginal distribution plot shows that the VAE preserves the load di
 > This shows that attackers face a choice between hiding well and manipulating decisions effectively, and your work studies both cases.*
 
 ## Generative Adversarial Networks (GANs)
+The GAN-based attacker learns to fabricate network state measurements by training a generator to produce samples that are indistinguishable from benign observations according to a discriminator. Unlike AE and VAE based attacks, the GAN does not condition on the current network state and instead generates entirely synthetic reports that preserve global statistical properties while discarding physical and temporal consistency. The training objective encourages realism rather than accuracy, making the attack highly stealthy but less predictable in its effect on resource allocation.
