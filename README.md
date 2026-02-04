@@ -24,7 +24,7 @@ Together, these figures illustrates the effect of the autoencoder-based percepti
 
 >*These three figures collectively illustrate the stealth–impact tradeoff of the proposed perception-layer attack.
 > While the attacked load trajectory closely follows the true network evolution over time, subtle shifts in the reported load–SINR space cause multiple states to cross scheduling decision boundaries, leading to excess resource allocation.
-> At the same time, the attacked states remain embedded within the benign data manifold in latent space, explaining why conventional statistical or clustering-based detectors fail to identify the attack.
+> At the same time, the attacked states remain embedded within the benign data manifold in latent space, explaining why conventional statistical or clustering-based detectors fail to identify the attack*
 
 
 ## Variational AutoEnoder (VAE)
