@@ -92,3 +92,7 @@ Finally, thefigure 4 analyzes the marginal distribution of the reported cell loa
 | Mean ΔSINR                    | `−2.4×10⁻⁵` | `−3.0×10⁻³`  | `0.087`      |
 | Std ΔSINR                     | `0.168`     | `0.340`      | `0.699`      |
 | Regime misclassification rate | `0.054`     | `0.092`      | `0.215`      |
+
+>*This table reports the empirical impact of each generative attack on reported network states.
+> While the AE introduces minimal mean distortion with low variance, the VAE exhibits higher variability due to probabilistic sampling, and the GAN induces the largest dispersion across both load and SINR dimensions.
+>The increasing regime misclassification rate from AE to GAN reflects how stronger generative models more frequently alter the perceived operating regime, despite preserving statistical plausibility.*
