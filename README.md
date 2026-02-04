@@ -12,7 +12,7 @@ Consider a scheduler that allocates additional PRBs only when the reported cell 
 
 | Time Domain of AE Plot | Load–SINR decision-space plot | Latent Geometry Plot of AE |
 | :---: | :---: | :---: | 
-| ![Alt1](AE.png) | ![Alt2](AE_2.png) | ![Alt2](AE_3.png) |
+| ![Alt1](AE.png) | ![Alt2](AE_2.png) | ![Alt3](AE_3.png) |
 
 The first figure shows the same network over time, with two curves: Blue (True load): the real cell load produced by your simulator and Orange (Attacked load): the load reported after the AE attackThey almost overlap, which is important. It means the attacker is not injecting noise or making big, obvious changes. However, if you look closely, the orange curve is slightly biased downward during many high-load periods. In other words, when the cell is actually stressed, the reported load is nudged to look a bit healthier. Thus, the attacker subtly reduces the perceived congestion of the cell while preserving temporal continuity and trends. This is the stealth.
 
