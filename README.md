@@ -10,9 +10,9 @@ Consider a scheduler that allocates additional PRBs only when the reported cell 
 [0.75,0.04,20.9,348,15.2]. Each reported metric remains within historically observed ranges, yet the joint physical consistency is violated, as SINR quality appears to improve despite sustained high contention. When the scheduler evaluates this attacked state, the reported load now falls below the congestion threshold and the reported SINR exceeds the quality requirement, causing the scheduler to allocate additional PRBs that would have been denied under the true state. These extra resources are therefore extracted purely through perception-layer manipulation, not through genuine capacity or channel improvement, and conventional threshold- or distribution-based checks fail to detect the attack because the reported metrics remain statistically plausible.
 
 
-| Effect of AE Plot | load–SINR decision-space plot |
-| :---: | :---: |
-| ![Alt1](AE.png) | ![Alt2](AE_2.png) |
+| Time Domain of AE Plot | Load–SINR decision-space plot | Latent Geometry Plot of AE |
+| :---: | :---: | :---: | 
+| ![Alt1](AE.png) | ![Alt2](AE_2.png) | ![Alt2](AE_3.png) |
 
 The first figure shows the same network over time, with two curves: Blue (True load): the real cell load produced by your simulator and Orange (Attacked load): the load reported after the AE attackThey almost overlap, which is important. It means the attacker is not injecting noise or making big, obvious changes. However, if you look closely, the orange curve is slightly biased downward during many high-load periods. In other words, when the cell is actually stressed, the reported load is nudged to look a bit healthier. Thus, the attacker subtly reduces the perceived congestion of the cell while preserving temporal continuity and trends. This is the stealth.
 
