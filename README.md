@@ -101,3 +101,13 @@ We consider a class of perception-layer attackers that leverage deep generative 
 >*This table reports the empirical impact of each generative attack on reported network states.
 > While the AE introduces minimal mean distortion with low variance, the VAE exhibits higher variability due to probabilistic sampling, and the GAN induces the largest dispersion across both load and SINR dimensions.
 >The increasing regime misclassification rate from AE to GAN reflects how stronger generative models more frequently alter the perceived operating regime, despite preserving statistical plausibility.*
+
+# The Classical Detector Baselines
+
+## Reconstruction based detector
+The first classical baseline is an unsupervised reconstruction-based autoencoder detector that evaluates network integrity by measuring how well observed states can be reconstructed from a representation learned on benign data. During evaluation, each incoming network state is passed through the autoencoder, and the reconstruction error is used as an anomaly score; states whose reconstruction error exceeds a threshold calibrated to maintain a 1% false alarm rate are classified as malicious. 
+![Alt1](Reconstruction_Detector.png)
+The detection results reveal clear and interpretable differences across attack models. The AE-based attack achieves a detection rate of 7.76% because it deterministically reconstructs benign-looking states, producing highly smooth and conservative perturbations that remain tightly embedded within the learned manifold. The VAE-based attack is even harder to detect, with a detection rate of 4.60%, since stochastic sampling in the latent space explicitly regularizes generated states toward the global benign distribution, further suppressing reconstruction error and making deviations appear statistically normal. In contrast, the GAN-based attack, despite being the most expressive and adaptive generator, is detected more frequently at 18.10%. This counterintuitive behavior arises because adversarial training prioritizes distributional realism rather than strict reconstruction fidelity, introducing higher variance and subtle cross-feature inconsistencies that are harder for the autoencoder to compress accurately. As a result, GAN-generated states are more likely to incur localized reconstruction errors even while remaining visually and statistically plausible.
+>* The results indicate that reconstruction-based detectors are fundamentally limited against perception-layer generative attacks: stronger generative models are not necessarily more stealthy under reconstruction metrics, and detectability depends less on visual plausibility than on how tightly an attack preserves the geometric structure learned by the autoencoder.*
+
+
