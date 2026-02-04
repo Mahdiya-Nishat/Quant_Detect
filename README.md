@@ -70,3 +70,25 @@ Furthermore, we examine how the GAN attack manifests over time for the same unde
 Finally, thefigure 4 analyzes the marginal distribution of the reported cell load. The histogram shows near-perfect alignment between the true and GAN-attacked load distributions, indicating that the GAN preserves first-order statistics extremely well. From a distributional perspective, the attacked data remains indistinguishable from benign observations, which explains why density-based or threshold-based detectors would not raise alarms.
 
 >*This highlights the capability of GAN-based attackers to remain stealthy across geometry, time, and statistics, reinforcing the need for detection mechanisms that go beyond marginal plausibility and consider deeper structural consistency.*
+
+## The Intelligent Attacks by the Deep generative Models
+
+| **Aspect**                         | **AE Attack**                                               | **VAE Attack**                                                   | **GAN Attack**                                                                       |
+| ---------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| **Core idea**                      | Deterministic reconstruction toward nearest benign manifold | Probabilistic generation from latent distribution of benign data | Adversarial sampling to fool discriminator into believing fake samples are real      |
+| **Mathematical formulation**       | `X̂_t = f_θ(X_t)` <br> `X_t^att = (1−λ)X_t + λX̂_t`         | `z ~ q_φ(z \| X_t)` <br> `X̂_t = g_θ(z)` <br> `X_t^att = X̂_t`   | `z ~ p(z)` <br> `X̂_t = G_θ(z)` <br> `min_G max_D E[log D(X)] + E[log(1 − D(G(z)))]` |
+| **Source of randomness**           | None beyond λ mixing                                        | Latent sample `z` introduces stochasticity                       | Latent input plus adversarial loss creates diverse outputs                           |
+| **Relation to true state**         | Anchored — directly influenced by current `X_t`             | Loosely conditioned — sample from distribution informed by `X_t` | Not tightly coupled — generated from learned distribution                            |
+| **Stealth (distributional match)** | Medium                                                      | High                                                             | Very High                                                                            |
+| **Decision-bias control**          | High (direct and smooth)                                    | Medium (randomized)                                              | Variable (distribution-driven)                                                       |
+| **Temporal coherence**             | Preserved (follows true state series)                       | Weaker (due to sampling variance)                                | Preserved (learned from data)                                                        |
+
+
+
+| **Metric**                    | **AE**      | **VAE**      | **GAN**      |
+| ----------------------------- | ----------- | ------------ | ------------ |
+| Mean Δρ                       | `2.1×10⁻⁴`  | `−2.26×10⁻²` | `−9.94×10⁻³` |
+| Std Δρ                        | `0.146`     | `0.304`      | `0.627`      |
+| Mean ΔSINR                    | `−2.4×10⁻⁵` | `−3.0×10⁻³`  | `0.087`      |
+| Std ΔSINR                     | `0.168`     | `0.340`      | `0.699`      |
+| Regime misclassification rate | `0.054`     | `0.092`      | `0.215`      |
