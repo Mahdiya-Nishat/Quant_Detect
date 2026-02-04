@@ -53,3 +53,4 @@ Finally, the marginal distribution plot shows that the VAE preserves the load di
 > The AE attack, on the other hand, is more deliberate and consistently pushes the network toward favorable decisions, but it is slightly easier to spot.
 > This shows that attackers face a choice between hiding well and manipulating decisions effectively, and your work studies both cases.*
 
+## Generative Adversarial Networks (GANs)
