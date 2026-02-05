@@ -102,9 +102,7 @@ We consider a class of perception-layer attackers that leverage deep generative 
 > While the AE introduces minimal mean distortion with low variance, the VAE exhibits higher variability due to probabilistic sampling, and the GAN induces the largest dispersion across both load and SINR dimensions.
 >The increasing regime misclassification rate from AE to GAN reflects how stronger generative models more frequently alter the perceived operating regime, despite preserving statistical plausibility.*
 
-# The Classical Detector Baselines
-
-## Reconstruction–Temporal Anomaly Detector
+# The Classical Detector: Reconstruction–Temporal Anomaly Detector
 The first classical baseline is an unsupervised reconstruction–temporal anomaly detector that assesses network integrity by quantifying deviations from benign reconstruction fidelity and short-term temporal consistency. An autoencoder is trained exclusively on benign network states to learn a compact representation of normal operating behavior. During inference, each incoming state is assigned a composite anomaly score that integrates reconstruction error, temporal variation across consecutive states, and latent-space trajectory deviation, thereby capturing both instantaneous and dynamic inconsistencies without relying on attack-specific assumptions. A detection threshold is calibrated solely on benign validation data to enforce a fixed false alarm rate of 1%, after which the threshold is held constant for all evaluations. 
 ![values 1](RBD.png)
 The AE-based attack achieves a detection rate of 46.87%, indicating that although autoencoder-based attackers generate smooth and benign-looking perturbations, their deterministic reconstruction process fails to fully preserve higher-order temporal and cross-feature dependencies, leading to consistent deviations that are captured by the composite anomaly score.
@@ -113,3 +111,11 @@ In contrast, the GAN-based attack exhibits the lowest detection rate of 18.66%, 
 
 >*The limited detection rates do not indicate detector weakness but rather expose the intrinsic stealth of generative attacks under fixed false-alarm constraints.
 >By explicitly preserving the statistical, temporal, and geometric structure of benign network states, these attacks ensure that a substantial portion of malicious samples remain indistinguishable from normal behavior when evaluated using reconstruction-centric criteria.*
+
+| CDF Plot of Anomaly Scores | Load-Regime Decomposition of Detection Rate|
+| :---: | :---: |
+| ![Alt1](D1_RBD.png) | ![Alt2](D2_RBD.png) |
+The figure 1 repreents CDF of the composite anomaly score S(x_t) under benign and generative attack conditions.
+The score S (x_t) is computed as a weighted sum of normalized reconstruction error, temporal energy, and latent-space trajectory deviation, with all statistics estimated from benign training data. A detection threshold 𝜏 is fixed at the 99th percentile of benign validation scores to enforce a 1% false-alarm rate and is applied uniformly across all attacks. The overlap of the attack CDFs with the benign distribution indicates that a large fraction of AE, VAE, and GAN samples satisfy S(x_t)≤ 𝜏, while the progressively closer alignment of VAE and GAN curves with the benign CDF quantitatively explains the decreasing detection rates as generative expressiveness increases. The figure 2 illustrates decomposition of overall detection rates across load regimes, showing how detected AE, VAE, and GAN attacks are distributed over low-, medium-, and high-load conditions under a fixed false-alarm constraint.
+
+
