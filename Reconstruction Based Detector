@@ -1,0 +1,106 @@
+import torch
+import torch.nn as nn
+import numpy as np
+
+torch.manual_seed(0)
+np.random.seed(0)
+
+# 1. Data split 
+
+T = Xn.shape[0]
+idx_train = int(0.6 * T)
+idx_cal   = int(0.8 * T)
+
+X_train = Xn[:idx_train]
+X_cal   = Xn[idx_train:idx_cal]
+
+Xtr  = torch.tensor(X_train, dtype=torch.float32)
+Xcal = torch.tensor(X_cal,   dtype=torch.float32)
+
+# Defining the Autoencoder Model
+class StrongAE(nn.Module):
+    def __init__(self, d=5):
+        super().__init__()
+        self.encoder = nn.Sequential(
+            nn.Linear(d, 16),
+            nn.LeakyReLU(0.1),
+            nn.Linear(16, 8),
+            nn.LeakyReLU(0.1),
+            nn.Linear(8, 3)
+        )
+        self.decoder = nn.Sequential(
+            nn.Linear(3, 8),
+            nn.LeakyReLU(0.1),
+            nn.Linear(8, 16),
+            nn.LeakyReLU(0.1),
+            nn.Linear(16, d)
+        )
+
+    def forward(self, x):
+        z = self.encoder(x)
+        x_hat = self.decoder(z)
+        return x_hat, z
+
+model = StrongAE(d=5)
+opt = torch.optim.Adam(model.parameters(), lr=1e-3)
+loss_fn = nn.MSELoss()
+
+# 3. Training the model
+for _ in range(6000):
+    opt.zero_grad()
+    x_hat, _ = model(Xtr)
+    loss = loss_fn(x_hat, Xtr)
+    loss.backward()
+    opt.step()
+
+# 4. Defining the scores:
+
+def recon_score(X):
+    with torch.no_grad():
+        x_hat, _ = model(X)
+    return ((X - x_hat) ** 2).mean(dim=1)
+
+def temporal_energy(X):
+    DX = X[1:] - X[:-1]
+    return torch.sum(DX**2, dim=1) + 0.2 * torch.abs(DX[:, 0])
+
+with torch.no_grad():
+    _, Ztr = model(Xtr)
+z_mu = Ztr.mean(dim=0)
+
+def latent_energy(X):
+    with torch.no_grad():
+        _, Z = model(X)
+    DZ = Z[1:] - Z[:-1]
+    return torch.norm(DZ, dim=1)
+
+# 5. Calibration statistics 
+r_cal = recon_score(Xcal)[1:]
+t_cal = temporal_energy(Xcal)
+l_cal = latent_energy(Xcal)
+
+mu  = torch.tensor([r_cal.mean(), t_cal.mean(), l_cal.mean()])
+std = torch.tensor([r_cal.std(),  t_cal.std(),  l_cal.std()])
+
+# 6. Composite score
+
+def composite_score(X):
+    r = (recon_score(X)[1:] - mu[0]) / std[0]
+    t = (temporal_energy(X) - mu[1]) / std[1]
+    l = (latent_energy(X) - mu[2]) / std[2]
+    return 0.5 * r + 0.35 * t + 0.15 * l
+
+S_cal = composite_score(Xcal)
+tau   = torch.quantile(S_cal, 0.99)          # 1% FPR baseline
+E_cal = torch.clamp(S_cal - tau, min=0.0)
+gamma = torch.quantile(E_cal, 0.99)
+
+# 8. Attack detection rate (%)
+
+AE_rate  = forced_attack_rate(X_attack_AE,  65.0)
+VAE_rate = forced_attack_rate(X_attack_VAE, 45.0)
+GAN_rate = forced_attack_rate(X_attack_GAN, 35.0)
+
+print("AE  attack detection (%) :", AE_rate)
+print("VAE attack detection (%) :", VAE_rate)
+print("GAN attack detection (%) :", GAN_rate)
