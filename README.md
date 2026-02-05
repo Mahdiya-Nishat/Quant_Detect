@@ -115,6 +115,7 @@ In contrast, the GAN-based attack exhibits the lowest detection rate of 18.66%, 
 | CDF Plot of Anomaly Scores | Load-Regime Decomposition of Detection Rate|
 | :---: | :---: |
 | ![Alt1](D1_RBD.png) | ![Alt2](D2_RBD.png) |
+
 The figure 1 repreents CDF of the composite anomaly score S(x_t) under benign and generative attack conditions.
 The score S (x_t) is computed as a weighted sum of normalized reconstruction error, temporal energy, and latent-space trajectory deviation, with all statistics estimated from benign training data. A detection threshold 𝜏 is fixed at the 99th percentile of benign validation scores to enforce a 1% false-alarm rate and is applied uniformly across all attacks. The overlap of the attack CDFs with the benign distribution indicates that a large fraction of AE, VAE, and GAN samples satisfy S(x_t)≤ 𝜏, while the progressively closer alignment of VAE and GAN curves with the benign CDF quantitatively explains the decreasing detection rates as generative expressiveness increases. The figure 2 illustrates decomposition of overall detection rates across load regimes, showing how detected AE, VAE, and GAN attacks are distributed over low-, medium-, and high-load conditions under a fixed false-alarm constraint.
 
