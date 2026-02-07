@@ -130,3 +130,9 @@ The QVAE extends the QAE concept by introducing probabilistic latent modeling in
 
 ## QSVDD
 The QSVDD is a one-class classification approach adapted to quantum feature spaces. The idea is to map classical or quantum data into a high-dimensional Hilbert space (the vector space used to describe quantum states) using quantum feature maps, and then construct the smallest hypersphere that encloses normal data points. During inference, samples lying outside this boundary are treated as anomalies. The quantum advantage arises from the expressive feature mapping enabled by quantum circuits, which can represent complex nonlinear structures that are difficult to model classically. QSVDD thus acts as a boundary-based baseline, complementing reconstruction-based methods like QAE and QVAE, and providing a different perspective on quantum anomaly detection performance.
+
+# The Proposed QuanT_Detect Model
+## Comparision against Baselines (Robustness Analysis)
+| ROC-AUC on AE Attack | ROC-AUC on AE Attack| ROC-AUC on AE Attack|
+| :---: | :---: | :---: |
+| ![Alt1](roc_auc_1.png) |  ![Alt2](roc_auc_2.png) |  ![Alt3](roc_auc_3.png) |
