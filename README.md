@@ -133,6 +133,6 @@ The QSVDD is a one-class classification approach adapted to quantum feature spac
 
 # The Proposed QuanT_Detect Model
 ## Comparision against Baselines (Robustness Analysis)
-| ROC-AUC on AE Attack | ROC-AUC on AE Attack| ROC-AUC on AE Attack|
+| ROC-AUC on AE Attack | ROC-AUC on VAE Attack| ROC-AUC on GAN Attack|
 | :---: | :---: | :---: |
 | ![Alt1](roc-auc_1.png) |  ![Alt2](roc_auc_2.png) |  ![Alt3](roc_auc_3.png) |
